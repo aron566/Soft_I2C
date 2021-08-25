@@ -442,6 +442,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Transmitx(void *x, uint8_t Saddr, const uint8_t
   I2C_Send_Byte(Saddr);
   if(I2C_Wait_Ack() == false)
   {
+    Soft_Free_State = true;
     return HAL_ERROR;
   }
   
@@ -450,6 +451,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Transmitx(void *x, uint8_t Saddr, const uint8_t
     I2C_Send_Byte(Data[i]);
     if(I2C_Wait_Ack() == false)
     {
+      Soft_Free_State = true;
       return HAL_ERROR;
     }
   }
@@ -482,6 +484,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Receivex(void *x, uint8_t Saddr, uint8_t *Buf, 
   I2C_Send_Byte(Saddr);
   if(I2C_Wait_Ack() == false)
   {
+    Soft_Free_State = true;
     return HAL_ERROR;
   }
   
