@@ -9,7 +9,7 @@
  *
  *  @brief 软件I2C通讯
  *
- *  @details None
+ *  @details 从机必须将SCL SDA数据线默认上拉
  *
  *  @version V1.1
  */
@@ -72,7 +72,7 @@ static void I2C_Ack(void);
 static void I2C_NAck(void);
 static void I2C_Send_Byte(uint8_t txd);
 static uint8_t I2C_Read_Byte(uint8_t ack);
-
+static bool I2C_Bus_Free_Check(void);
 /** Private user code --------------------------------------------------------*/
 
 /** Private application code -------------------------------------------------*/
@@ -142,7 +142,7 @@ static void SDA_Output(void)
 	GPIO_InitStruct.Pin = MYI2C_SDA_PIN;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(MYI2C_SDA_PORT,&GPIO_InitStruct);
+	HAL_GPIO_Init(MYI2C_SDA_PORT, &GPIO_InitStruct);
 }
  
  /**
@@ -161,8 +161,8 @@ static void SDA_Input(void)
 	GPIO_InitStruct.Pin = MYI2C_SDA_PIN;
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;/*没有上下拉*/
-	GPIO_InitStruct.Speed =GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(MYI2C_SDA_PORT,&GPIO_InitStruct);
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(MYI2C_SDA_PORT, &GPIO_InitStruct);
 }
  
  /**
@@ -180,8 +180,8 @@ static void SCL_Output(void)
 	GPIO_InitTypeDef GPIO_InitStruct;
 	GPIO_InitStruct.Pin = MYI2C_SCL_PIN;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Speed =GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(MYI2C_SCL_PORT,&GPIO_InitStruct);
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(MYI2C_SCL_PORT, &GPIO_InitStruct);
 }
  
  /**
@@ -201,7 +201,7 @@ static void SCL_Input(void)
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;/*没有上下拉*/
 	GPIO_InitStruct.Speed =GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(MYI2C_SCL_PORT,&GPIO_InitStruct);
+	HAL_GPIO_Init(MYI2C_SCL_PORT, &GPIO_InitStruct);
 }
 
 /**
@@ -373,7 +373,7 @@ static void I2C_Send_Byte(uint8_t txd)
 	for(t = 0; t < 8; t++)
 	{  
 		SDA_Write((txd&0x80)>>7);		   
-		txd<<=1; 	  
+		txd <<= 1;
 		Delay_us(I2C_BAUDRATE_DELAY_US);
 		SCL_Dout_HIGH();
 		Delay_us(I2C_BAUDRATE_DELAY_US); 	
@@ -401,7 +401,7 @@ static uint8_t I2C_Read_Byte(uint8_t ack)
 		SCL_Dout_LOW();
 		Delay_us(I2C_BAUDRATE_DELAY_US);
 		SCL_Dout_HIGH();
-		receive<<=1;
+		receive <<= 1;
 		if(SDA_Data_IN())receive++;   
 		Delay_us(I2C_BAUDRATE_DELAY_US);
   }					 
@@ -411,6 +411,32 @@ static uint8_t I2C_Read_Byte(uint8_t ack)
 	return receive;
 }
 
+/**
+  ******************************************************************
+  * @brief   读取I2C总线空闲状态 
+  * @param   [in]None.
+  * @retval  True Free state
+  * @author  aron566
+  * @version V1.0
+  * @date    2021-09-02
+  ******************************************************************
+  */
+static bool I2C_Bus_Free_Check(void)
+{
+  bool State = false;
+	//SDA设置为输入
+	SDA_Input();
+
+  /*SCL设置为输入*/
+  SCL_Input();
+  
+  if(SDA_Data_IN() && SCL_Data_IN())
+  {
+    State = true;
+  }
+  SCL_Output();
+  return State;
+}
 /** Public application code --------------------------------------------------*/
 /*******************************************************************************
 *
@@ -435,6 +461,12 @@ static uint8_t I2C_Read_Byte(uint8_t ack)
 HAL_StatusTypeDef HAL_I2C_Master_Transmitx(void *x, uint8_t Saddr, const uint8_t *Data, uint16_t Size, uint32_t Block_Time)
 {
   (void)(Block_Time);
+  /*检测总线状态*/
+  if(I2C_Bus_Free_Check() == false)
+  {
+    return false;
+  }
+  
   Soft_Free_State = false;
   I2C_Start();
   
@@ -477,6 +509,12 @@ HAL_StatusTypeDef HAL_I2C_Master_Transmitx(void *x, uint8_t Saddr, const uint8_t
 HAL_StatusTypeDef HAL_I2C_Master_Receivex(void *x, uint8_t Saddr, uint8_t *Buf, uint16_t Size, uint32_t Block_Time)
 {
   (void)(Block_Time);
+  /*检测总线状态*/
+  if(I2C_Bus_Free_Check() == false)
+  {
+    return false;
+  }  
+  
   Soft_Free_State = false;
   I2C_Start();
   
