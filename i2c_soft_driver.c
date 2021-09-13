@@ -140,7 +140,8 @@ static void SDA_Output(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct;
 	GPIO_InitStruct.Pin = MYI2C_SDA_PIN;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(MYI2C_SDA_PORT, &GPIO_InitStruct);
 }
@@ -179,7 +180,8 @@ static void SCL_Output(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct;
 	GPIO_InitStruct.Pin = MYI2C_SCL_PIN;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(MYI2C_SCL_PORT, &GPIO_InitStruct);
 }
@@ -200,7 +202,7 @@ static void SCL_Input(void)
 	GPIO_InitStruct.Pin = MYI2C_SCL_PIN;
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;/*没有上下拉*/
-	GPIO_InitStruct.Speed =GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(MYI2C_SCL_PORT, &GPIO_InitStruct);
 }
 
