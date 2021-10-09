@@ -138,12 +138,12 @@ static void delay_xus(__IO uint32_t nTime)
 	*/
 static void SDA_Output(void)
 {
-	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.Pin = MYI2C_SDA_PIN;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = MYI2C_SDA_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(MYI2C_SDA_PORT, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(MYI2C_SDA_PORT, &GPIO_InitStruct);
 }
  
  /**
@@ -158,12 +158,12 @@ static void SDA_Output(void)
 	*/
 static void SDA_Input(void)
 {
-	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.Pin = MYI2C_SDA_PIN;
-	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = MYI2C_SDA_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(MYI2C_SDA_PORT, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(MYI2C_SDA_PORT, &GPIO_InitStruct);
 }
  
  /**
@@ -178,12 +178,12 @@ static void SDA_Input(void)
 	*/
 static void SCL_Output(void)
 {
-	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.Pin = MYI2C_SCL_PIN;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = MYI2C_SCL_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(MYI2C_SCL_PORT, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(MYI2C_SCL_PORT, &GPIO_InitStruct);
 }
  
  /**
@@ -198,12 +198,12 @@ static void SCL_Output(void)
 	*/
 static void SCL_Input(void)
 {
-	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.Pin = MYI2C_SCL_PIN;
-	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = MYI2C_SCL_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(MYI2C_SCL_PORT, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(MYI2C_SCL_PORT, &GPIO_InitStruct);
 }
 
 /**
@@ -218,10 +218,10 @@ static void SCL_Input(void)
   */
 static void I2C_Init(void)
 {	
-	SCL_Dout_HIGH();
-	SDA_Dout_HIGH();
-	SCL_Output();
-	SDA_Output();
+  SCL_Dout_HIGH();
+  SDA_Dout_HIGH();
+  SCL_Output();
+  SDA_Output();
 }
  
 /**
@@ -237,13 +237,13 @@ static void I2C_Init(void)
 static void I2C_Start(void)
 {
   SDA_Dout_HIGH();
-	SDA_Output();
-	
-	SCL_Dout_HIGH();
-	Delay_us(I2C_BAUDRATE_DELAY_US);
-	SDA_Dout_LOW();
-	Delay_us(I2C_BAUDRATE_DELAY_US);
-	SCL_Dout_LOW();
+  SDA_Output();
+
+  SCL_Dout_HIGH();
+  Delay_us(I2C_BAUDRATE_DELAY_US);
+  SDA_Dout_LOW();
+  Delay_us(I2C_BAUDRATE_DELAY_US);
+  SCL_Dout_LOW();
 }
  
 /**
@@ -259,14 +259,14 @@ static void I2C_Start(void)
 static void I2C_Stop(void)
 {
   SDA_Dout_LOW();
-	SDA_Output();
-  
-	SCL_Dout_LOW();
-	Delay_us(I2C_BAUDRATE_DELAY_US);
-	SCL_Dout_HIGH();
-  
-	SDA_Dout_HIGH();
-	Delay_us(I2C_BAUDRATE_DELAY_US);						   	
+  SDA_Output();
+
+  SCL_Dout_LOW();
+  Delay_us(I2C_BAUDRATE_DELAY_US);
+  SCL_Dout_HIGH();
+
+  SDA_Dout_HIGH();
+  Delay_us(I2C_BAUDRATE_DELAY_US);						   	
 }
  
 /**
@@ -281,30 +281,30 @@ static void I2C_Stop(void)
   */
 static bool I2C_Wait_Ack(void)
 {
-	uint8_t ucErrTime = 0;
-	
+  uint8_t ucErrTime = 0;
+
   /*配置为输入*/
   //SDA_Input();
-  
+
   Delay_us(I2C_BAUDRATE_DELAY_US);
-  
-	//SDA_Dout_HIGH();Delay_us(1);	   
-	SCL_Dout_HIGH();Delay_us(1);
-  
-	while(SDA_Data_IN())
-	{
+
+  //SDA_Dout_HIGH();Delay_us(1);	   
+  SCL_Dout_HIGH();Delay_us(1);
+
+  while(SDA_Data_IN())
+  {
     /*检测超时*/
-		ucErrTime++;
-		if(ucErrTime > (I2C_BAUDRATE_DELAY_US))
-		{
-			I2C_Stop();
-			return false;
-		}
+    ucErrTime++;
+    if(ucErrTime > (I2C_BAUDRATE_DELAY_US))
+    {
+      I2C_Stop();
+      return false;
+    }
     Delay_us(1);
-	}
+  }
   Delay_us(I2C_BAUDRATE_DELAY_US-ucErrTime);
-	SCL_Dout_LOW();//时钟输出0 	   
-	return true; 
+  SCL_Dout_LOW();//时钟输出0 	   
+  return true; 
 }
  
 /**
@@ -319,15 +319,15 @@ static bool I2C_Wait_Ack(void)
   */
 static void I2C_Ack(void)
 {
-	SCL_Dout_LOW();
+  SCL_Dout_LOW();
 
   SDA_Dout_LOW();
-	SDA_Output();
+  SDA_Output();
 
-	Delay_us(I2C_BAUDRATE_DELAY_US);
-	SCL_Dout_HIGH();
-	Delay_us(I2C_BAUDRATE_DELAY_US);
-	SCL_Dout_LOW();
+  Delay_us(I2C_BAUDRATE_DELAY_US);
+  SCL_Dout_HIGH();
+  Delay_us(I2C_BAUDRATE_DELAY_US);
+  SCL_Dout_LOW();
 }
  
 /**
@@ -342,15 +342,15 @@ static void I2C_Ack(void)
   */
 static void I2C_NAck(void)
 {
-	SCL_Dout_LOW();
-  
+  SCL_Dout_LOW();
+
   SDA_Dout_HIGH();
-	SDA_Output();
-	
-	Delay_us(I2C_BAUDRATE_DELAY_US);
-	SCL_Dout_HIGH();
-	Delay_us(I2C_BAUDRATE_DELAY_US);
-	SCL_Dout_LOW();
+  SDA_Output();
+
+  Delay_us(I2C_BAUDRATE_DELAY_US);
+  SCL_Dout_HIGH();
+  Delay_us(I2C_BAUDRATE_DELAY_US);
+  SCL_Dout_LOW();
 }					 				     
 
 /**
@@ -365,21 +365,21 @@ static void I2C_NAck(void)
   */
 static void I2C_Send_Byte(uint8_t txd) 
 {                        
-	uint8_t t;      
-	/*拉低时钟开始数据传输，设置数据线默认值*/
+  uint8_t t;      
+  /*拉低时钟开始数据传输，设置数据线默认值*/
   SCL_Dout_LOW();
-  
+
   SDA_Dout_HIGH();
-	SDA_Output();
-  
-	for(t = 0; t < 8; t++)
-	{  
-		SDA_Write((txd&0x80)>>7);		   
-		txd <<= 1;
-		Delay_us(I2C_BAUDRATE_DELAY_US);
-		SCL_Dout_HIGH();
-		Delay_us(I2C_BAUDRATE_DELAY_US); 	
-		SCL_Dout_LOW();
+  SDA_Output();
+
+  for(t = 0; t < 8; t++)
+  {  
+    SDA_Write((txd&0x80)>>7);		   
+    txd <<= 1;
+    Delay_us(I2C_BAUDRATE_DELAY_US);
+    SCL_Dout_HIGH();
+    Delay_us(I2C_BAUDRATE_DELAY_US); 	
+    SCL_Dout_LOW();
   }	 
 } 	    
 
@@ -395,22 +395,22 @@ static void I2C_Send_Byte(uint8_t txd)
   */
 static uint8_t I2C_Read_Byte(uint8_t ack)
 {
-	uint8_t i, receive = 0;
-	//SDA设置为输入
-	SDA_Input();
+  uint8_t i, receive = 0;
+  //SDA设置为输入
+  SDA_Input();
   for(i = 0; i < 8; i++)
-	{
-		SCL_Dout_LOW();
-		Delay_us(I2C_BAUDRATE_DELAY_US);
-		SCL_Dout_HIGH();
-		receive <<= 1;
-		if(SDA_Data_IN())receive++;   
-		Delay_us(I2C_BAUDRATE_DELAY_US);
+  {
+    SCL_Dout_LOW();
+    Delay_us(I2C_BAUDRATE_DELAY_US);
+    SCL_Dout_HIGH();
+    receive <<= 1;
+    if(SDA_Data_IN())receive++;   
+    Delay_us(I2C_BAUDRATE_DELAY_US);
   }					 
   if(!ack)I2C_NAck();/**< 发送nACK*/
   else  I2C_Ack(); 	 /**< 发送ACK*/   
-  
-	return receive;
+
+  return receive;
 }
 
 /**
@@ -426,12 +426,12 @@ static uint8_t I2C_Read_Byte(uint8_t ack)
 static bool I2C_Bus_Free_Check(void)
 {
   bool State = false;
-	//SDA设置为输入
-	SDA_Input();
+  //SDA设置为输入
+  SDA_Input();
 
   /*SCL设置为输入*/
   SCL_Input();
-  
+
   if(SDA_Data_IN() && SCL_Data_IN())
   {
     State = true;
@@ -468,10 +468,10 @@ HAL_StatusTypeDef HAL_I2C_Master_Transmitx(void *x, uint8_t Saddr, const uint8_t
   {
     return false;
   }
-  
+
   Soft_Free_State = false;
   I2C_Start();
-  
+
   /*发送从机地址*/
   I2C_Send_Byte(Saddr);
   if(I2C_Wait_Ack() == false)
@@ -479,7 +479,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Transmitx(void *x, uint8_t Saddr, const uint8_t
     Soft_Free_State = true;
     return HAL_ERROR;
   }
-  
+
   for(uint16_t i = 0; i < Size; i++)
   {
     I2C_Send_Byte(Data[i]);
@@ -516,10 +516,10 @@ HAL_StatusTypeDef HAL_I2C_Master_Receivex(void *x, uint8_t Saddr, uint8_t *Buf, 
   {
     return false;
   }  
-  
+
   Soft_Free_State = false;
   I2C_Start();
-  
+
   /*发送从机地址*/
   I2C_Send_Byte(Saddr);
   if(I2C_Wait_Ack() == false)
@@ -527,7 +527,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Receivex(void *x, uint8_t Saddr, uint8_t *Buf, 
     Soft_Free_State = true;
     return HAL_ERROR;
   }
-  
+
   for(uint16_t i = 0; i < Size; i++)
   {
     Buf[i] = I2C_Read_Byte(((i+1) == Size)?0:1);
