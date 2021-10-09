@@ -53,7 +53,7 @@ void Parameter_Port_Init(void);
 /*更新参数*/
 void Parameter_Port_Update(const uint8_t *Data);
 /*设置参数*/
-bool Parameter_Port_Set_Par(uint16_t Reg_Addr, uint8_t Val);
+bool Parameter_Port_Set_Par(uint16_t Reg_Addr, uint8_t *Val);
 /*获取参数*/
 bool Parameter_Port_Get_Par(uint16_t Reg_Addr, uint8_t *Buf);
 /*设置参数通道*/

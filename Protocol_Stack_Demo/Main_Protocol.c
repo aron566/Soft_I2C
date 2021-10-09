@@ -442,7 +442,7 @@ static RETURN_TYPE_Typedef_t get_set_all_par(uint16_t reg_addr, void* data, REPL
 {
   if((COMMAND_TYPE_Typedef_t)reply_data->cmd == SET_PAR_CMD)
   {
-    if(Parameter_Port_Set_Par(reg_addr, *(uint8_t *)data) == false)
+    if(Parameter_Port_Set_Par(reg_addr, (uint8_t *)data) == false)
     {
       return RETURN_ERROR;
     }

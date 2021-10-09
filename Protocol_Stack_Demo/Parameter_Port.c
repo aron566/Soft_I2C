@@ -220,7 +220,11 @@ static REG_PAR_Typedef_t LEFT_Par_Index_Info[ ] =
   {
     .index = 0,
     .reg = 0x0F00,  /**< 场景模式*/
-  },  
+  }, 
+  {
+    .index = 0,
+    .reg = 0x4455,  /**< 一次性写入参数*/
+  },   
   {
     .index = 0,
     .reg = 0x0001,  /**< 通道选择*/
@@ -273,34 +277,34 @@ static bool Read_Par(DEVICE_CHANNEL_SEL_Typedef_t Channel, uint8_t Scene_Mode)
   
   /*读取*/
   /*step 1 设置操作的寄存器地址*/
-  data[0] = (uint8_t)(READ_PAR_REG >> 8)&0xFF;
-  data[1] = (uint8_t)READ_PAR_REG&0xFF;
-  /*step 2 发出命令包设置读 A场景模式参数*/
-  data[2] = Scene_Mode;
-  //while(HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY);//等待总线空闲
-  while(Soft_I2C_Is_Free() == false);
-  if(HAL_I2C_Master_Transmitx(&hi2c1, SAddrW, data, I2C_FRAME_SET_SIZE, 5000) != HAL_OK)
-  {
-    return false;
-  }
+//  data[0] = (uint8_t)(READ_PAR_REG >> 8)&0xFF;
+//  data[1] = (uint8_t)READ_PAR_REG&0xFF;
+//  /*step 2 发出命令包设置读 x场景模式参数*/
+//  data[2] = Scene_Mode;
+//  //while(HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY);//等待总线空闲
+//  while(Soft_I2C_Is_Free() == false);
+//  if(HAL_I2C_Master_Transmitx(&hi2c1, SAddrW, data, I2C_FRAME_SET_SIZE, 5000) != HAL_OK)
+//  {
+//    return false;
+//  }
 
   /*step 3 再读*/
   //while(HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY);//等待总线空闲
   while(Soft_I2C_Is_Free() == false);
-  if(HAL_I2C_Master_Receivex(&hi2c1, SAddrR, data+I2C_FRAME_SET_SIZE, I2C_FRAME_READ_SIZE, 5000) != HAL_OK)
+  if(HAL_I2C_Master_Receivex(&hi2c1, SAddrR, data, I2C_FRAME_READ_SIZE, 5000) != HAL_OK)
   {
     return false;
   }
   
   for(size_t i = 0; i < REG_NUM_SIZE; i++)
   {
-    Opt_Ptr[i].reg_val = data[I2C_FRAME_SET_SIZE+Opt_Ptr[i].index];
+    Opt_Ptr[i].reg_val = data[Opt_Ptr[i].index];
   }
   
   return true;
 }
 
-static bool Set_Par(DEVICE_CHANNEL_SEL_Typedef_t Channel, uint16_t RegAddr, uint8_t Val)
+static bool Set_Par(DEVICE_CHANNEL_SEL_Typedef_t Channel, uint16_t RegAddr, uint8_t *Val)
 {
   uint8_t SAddrW = 0;
   /*设备选择*/
@@ -315,13 +319,22 @@ static bool Set_Par(DEVICE_CHANNEL_SEL_Typedef_t Channel, uint16_t RegAddr, uint
   /*step 1 设置操作的寄存器地址*/
   data[0] = (uint8_t)(RegAddr >> 8)&0xFF;
   data[1] = (uint8_t)RegAddr&0xFF;
+  
+  uint16_t Data_Size = RegAddr == 0x4455?38:1;
   /*step 2 设置数值*/
-  data[2] = Val;
+  memmove(data+2, Val, Data_Size);
+
   //while(HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY);//等待总线空闲
   while(Soft_I2C_Is_Free() == false);
-  if(HAL_I2C_Master_Transmitx(&hi2c1, SAddrW, data, I2C_FRAME_SET_SIZE, 5000) != HAL_OK)
+  if(HAL_I2C_Master_Transmitx(&hi2c1, SAddrW, data, Data_Size + 2, 5000) != HAL_OK)
   {
     return false;
+  }
+  
+  /*当寄存器为一次性写入参数，触发读取，更新本地参数*/
+  if(RegAddr == 0x4455)
+  {
+    Read_Par(Channel, 0x0A);
   }
   return true;
 }
@@ -350,18 +363,18 @@ static void dbug_print(void)
   uint8_t index = 0;
   printf("%-*.*s\t%hhu\r\n", 20, 20, "音量:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
   printf("%-*.*s\t%hhu\r\n", 20, 20, "降噪:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
-  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道一静止区到放大区拐点:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
-  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道一放大区到压缩区拐点:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
-  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道一压缩区到限制区拐点:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
-  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道二静止区到放大区拐点:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
-  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道二放大区到压缩区拐点:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
-  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道二压缩区到限制区拐点:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
-  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道三静止区到放大区拐点:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
-  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道三放大区到压缩区拐点:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
-  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道三压缩区到限制区拐点:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
-  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道四静止区到放大区拐点:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
-  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道四放大区到压缩区拐点:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
-  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道四压缩区到限制区拐点:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
+  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道一静止区到放大区:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
+  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道一放大区到压缩区:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
+  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道一压缩区到限制区:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
+  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道二静止区到放大区:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
+  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道二放大区到压缩区:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
+  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道二压缩区到限制区:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
+  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道三静止区到放大区:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
+  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道三放大区到压缩区:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
+  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道三压缩区到限制区:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
+  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道四静止区到放大区:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
+  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道四放大区到压缩区:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
+  printf("%-*.*s\t%hhu\r\n", 20, 20, "通道四压缩区到限制区:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
   printf("%-*.*s\t0x%02X\r\n", 20, 20, "通道一放大系数:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
   printf("%-*.*s\t0x%02X\r\n", 20, 20, "通道一压缩系数:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
   printf("%-*.*s\t0x%02X\r\n", 20, 20, "通道二放大系数:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
@@ -370,6 +383,7 @@ static void dbug_print(void)
   printf("%-*.*s\t0x%02X\r\n", 20, 20, "通道三压缩系数:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
   printf("%-*.*s\t0x%02X\r\n", 20, 20, "通道四放大系数:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
   printf("%-*.*s\t0x%02X\r\n", 20, 20, "通道四压缩系数:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
+  printf("%-*.*s\t%02X\r\n", 20, 20, "场景参数:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
   printf("%-*.*s\t%02X\r\n", 20, 20, "保存参数:", Current_Channel_Reg_Par_Ptr[index++].reg_val); 
   printf("%-*.*s\t%hhu\r\n", 20, 20, "EQ_CH0:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
   printf("%-*.*s\t%hhu\r\n", 20, 20, "EQ_CH1:", Current_Channel_Reg_Par_Ptr[index++].reg_val);
@@ -426,14 +440,14 @@ void Parameter_Port_Update(const uint8_t *Data)
   ******************************************************************
   * @brief   设置参数
   * @param   [in]Reg_Addr 寄存器地址
-  * @param   [in]Val 数值
+  * @param   [in]Val 数值地址
   * @return  true 正确.
   * @author  aron566
   * @version V1.0
   * @date    2021-08-04
   ******************************************************************
   */
-bool Parameter_Port_Set_Par(uint16_t Reg_Addr, uint8_t Val)
+bool Parameter_Port_Set_Par(uint16_t Reg_Addr, uint8_t *Val)
 {
   size_t index = 0;
   /*获得寄存器所在索引*/
@@ -453,8 +467,13 @@ bool Parameter_Port_Set_Par(uint16_t Reg_Addr, uint8_t Val)
   /*通道选择设置*/
   if(Reg_Addr == 0x0001)
   {
-    Parameter_Port_Update_Channel((DEVICE_CHANNEL_SEL_Typedef_t)Val);
-    /*从新读取 更新参数*/
+    Parameter_Port_Update_Channel((DEVICE_CHANNEL_SEL_Typedef_t)(*Val));
+    /*切换至双通道，直接返回，不更新参数*/
+    if((DEVICE_CHANNEL_SEL_Typedef_t)(*Val) == BOTH_DEVICE_SEL)
+    {
+      return true;
+    }
+    /*从新读取 更新参数 -> 获得当前场景模式*/
     size_t Scene_Index = 0;
     for(; Scene_Index < Par_Num; Scene_Index++)
     {
@@ -470,16 +489,16 @@ bool Parameter_Port_Set_Par(uint16_t Reg_Addr, uint8_t Val)
   /*双通道*/
   if(Current_Channel_Sel != LEFT_DEVICE_SEL && Current_Channel_Sel != RIGHT_DEVICE_SEL)
   {
-      LEFT_Par_Index_Info[index].reg_val = Val;
-      RIGHT_Par_Index_Info[index].reg_val = Val;
+      LEFT_Par_Index_Info[index].reg_val = (*Val);
+      RIGHT_Par_Index_Info[index].reg_val = (*Val);
       /*TODO:发送至I2C左右从机*/
       if(Reg_Addr == 0x0F00)
       {
-        if(Read_Par(LEFT_DEVICE_SEL, Val) != true)
+        if(Read_Par(LEFT_DEVICE_SEL, (*Val)) != true)
         {
           return false;
         }
-        if(Read_Par(RIGHT_DEVICE_SEL, Val) != true)
+        if(Read_Par(RIGHT_DEVICE_SEL, (*Val)) != true)
         {
           return false;
         }
@@ -498,11 +517,12 @@ bool Parameter_Port_Set_Par(uint16_t Reg_Addr, uint8_t Val)
       return true;
   }
 
-  pCurrent_Channel_Reg_Par[index].reg_val = Val;
-  /*TODO:发送至I2C从机*/
+  pCurrent_Channel_Reg_Par[index].reg_val = (*Val);
+  /*TODO:发送至I2C从机,当操作寄存器为读取寄存器时，会触发读取操作进行更新参数,
+         在读此寄存器时会直接返回缓冲区数据*/
   if(Reg_Addr == 0x0F00)
   {
-    if(Read_Par(Current_Channel_Sel, Val) != true)
+    if(Read_Par(Current_Channel_Sel, (*Val)) != true)
     {
       return false;
     }
