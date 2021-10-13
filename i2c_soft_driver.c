@@ -38,10 +38,10 @@ extern "C" {
  * @name 模拟I2C引脚定义，及配置功能
  * @{
  */
-#define MYI2C_SCL_PIN		GPIO_PIN_6
-#define MYI2C_SCL_PORT	GPIOB
-#define MYI2C_SDA_PIN		GPIO_PIN_7
-#define MYI2C_SDA_PORT	GPIOB
+#define MYI2C_SCL_PIN    GPIO_PIN_6
+#define MYI2C_SCL_PORT  GPIOB
+#define MYI2C_SDA_PIN    GPIO_PIN_7
+#define MYI2C_SDA_PORT  GPIOB
 /** @}*/
  
 #define Delay_us(xx)  delay_xus(xx)
@@ -83,15 +83,15 @@ static bool I2C_Bus_Free_Check(void);
 ********************************************************************************
 */
 /**
-	******************************************************************
-	* @brief   模拟I2C us级延时
-	* @param   [in]nTime 延时us数
-	* @retval  None
-	* @author  aron566
-	* @version V1.0
-	* @date    2021-07-23
-	******************************************************************
-	*/
+  ******************************************************************
+  * @brief   模拟I2C us级延时
+  * @param   [in]nTime 延时us数
+  * @retval  None
+  * @author  aron566
+  * @version V1.0
+  * @date    2021-07-23
+  ******************************************************************
+  */
 static void delay_xus(__IO uint32_t nTime)
 {
     int old_val,new_val,val;
@@ -126,16 +126,16 @@ static void delay_xus(__IO uint32_t nTime)
     }
 }
  
- /**
-	******************************************************************
-	* @brief   模拟I2C 数据脚配置为输出模式
-	* @param   [in]None
-	* @retval  None
-	* @author  aron566
-	* @version V1.0
-	* @date    2021-07-23
-	******************************************************************
-	*/
+/**
+ ******************************************************************
+ * @brief   模拟I2C 数据脚配置为输出模式
+ * @param   [in]None
+ * @retval  None
+ * @author  aron566
+ * @version V1.0
+ * @date    2021-07-23
+ ******************************************************************
+ */
 static void SDA_Output(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -146,16 +146,16 @@ static void SDA_Output(void)
   HAL_GPIO_Init(MYI2C_SDA_PORT, &GPIO_InitStruct);
 }
  
- /**
-	******************************************************************
-	* @brief   模拟I2C 数据脚配置为输入模式
-	* @param   [in]None
-	* @retval  None
-	* @author  aron566
-	* @version V1.0
-	* @date    2021-07-23
-	******************************************************************
-	*/
+/**
+ ******************************************************************
+ * @brief   模拟I2C 数据脚配置为输入模式
+ * @param   [in]None
+ * @retval  None
+ * @author  aron566
+ * @version V1.0
+ * @date    2021-07-23
+ ******************************************************************
+ */
 static void SDA_Input(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -166,16 +166,16 @@ static void SDA_Input(void)
   HAL_GPIO_Init(MYI2C_SDA_PORT, &GPIO_InitStruct);
 }
  
- /**
-	******************************************************************
-	* @brief   模拟I2C 时钟脚配置为输出模式
-	* @param   [in]None
-	* @retval  None
-	* @author  aron566
-	* @version V1.0
-	* @date    2021-07-23
-	******************************************************************
-	*/
+/**
+ ******************************************************************
+ * @brief   模拟I2C 时钟脚配置为输出模式
+ * @param   [in]None
+ * @retval  None
+ * @author  aron566
+ * @version V1.0
+ * @date    2021-07-23
+ ******************************************************************
+ */
 static void SCL_Output(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -186,16 +186,16 @@ static void SCL_Output(void)
   HAL_GPIO_Init(MYI2C_SCL_PORT, &GPIO_InitStruct);
 }
  
- /**
-	******************************************************************
-	* @brief   模拟I2C 时钟脚配置为输入模式
-	* @param   [in]None
-	* @retval  None
-	* @author  aron566
-	* @version V1.0
-	* @date    2021-07-23
-	******************************************************************
-	*/
+/**
+ ******************************************************************
+ * @brief   模拟I2C 时钟脚配置为输入模式
+ * @param   [in]None
+ * @retval  None
+ * @author  aron566
+ * @version V1.0
+ * @date    2021-07-23
+ ******************************************************************
+ */
 static void SCL_Input(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -217,7 +217,7 @@ static void SCL_Input(void)
   ******************************************************************
   */
 static void I2C_Init(void)
-{	
+{  
   SCL_Dout_HIGH();
   SDA_Dout_HIGH();
   SCL_Output();
@@ -266,7 +266,7 @@ static void I2C_Stop(void)
   SCL_Dout_HIGH();
 
   SDA_Dout_HIGH();
-  Delay_us(I2C_BAUDRATE_DELAY_US);						   	
+  Delay_us(I2C_BAUDRATE_DELAY_US);                 
 }
  
 /**
@@ -288,7 +288,7 @@ static bool I2C_Wait_Ack(void)
 
   Delay_us(I2C_BAUDRATE_DELAY_US);
 
-  //SDA_Dout_HIGH();Delay_us(1);	   
+  //SDA_Dout_HIGH();Delay_us(1);     
   SCL_Dout_HIGH();Delay_us(1);
 
   while(SDA_Data_IN())
@@ -303,7 +303,7 @@ static bool I2C_Wait_Ack(void)
     Delay_us(1);
   }
   Delay_us(I2C_BAUDRATE_DELAY_US-ucErrTime);
-  SCL_Dout_LOW();//时钟输出0 	   
+  SCL_Dout_LOW();//时钟输出0      
   return true; 
 }
  
@@ -351,7 +351,7 @@ static void I2C_NAck(void)
   SCL_Dout_HIGH();
   Delay_us(I2C_BAUDRATE_DELAY_US);
   SCL_Dout_LOW();
-}					 				     
+}                        
 
 /**
   ******************************************************************
@@ -374,14 +374,14 @@ static void I2C_Send_Byte(uint8_t txd)
 
   for(t = 0; t < 8; t++)
   {  
-    SDA_Write((txd&0x80)>>7);		   
+    SDA_Write((txd&0x80)>>7);       
     txd <<= 1;
     Delay_us(I2C_BAUDRATE_DELAY_US);
     SCL_Dout_HIGH();
-    Delay_us(I2C_BAUDRATE_DELAY_US); 	
+    Delay_us(I2C_BAUDRATE_DELAY_US);   
     SCL_Dout_LOW();
-  }	 
-} 	    
+  }   
+}       
 
 /**
   ******************************************************************
@@ -406,9 +406,9 @@ static uint8_t I2C_Read_Byte(uint8_t ack)
     receive <<= 1;
     if(SDA_Data_IN())receive++;   
     Delay_us(I2C_BAUDRATE_DELAY_US);
-  }					 
+  }           
   if(!ack)I2C_NAck();/**< 发送nACK*/
-  else  I2C_Ack(); 	 /**< 发送ACK*/   
+  else  I2C_Ack();    /**< 发送ACK*/   
 
   return receive;
 }
